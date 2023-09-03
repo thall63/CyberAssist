@@ -1,2 +1,2 @@
 # CyberAssist
-PyQt6 application that scrapes Indicators Of Compromise (IOC) from unstructured textual data
+PyQt6 deskside app for cyber analysts. 
