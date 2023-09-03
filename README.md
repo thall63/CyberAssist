@@ -1,2 +1,2 @@
 # CyberAssist
-PyQt6 deskside app for cyber analysts. 
+PyQt6 deskside app for cyber analysts.
