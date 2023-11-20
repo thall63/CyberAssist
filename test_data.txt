@@ -1,0 +1,44 @@
+Test data
+
+# Scrape test sample
+192.168.1.1 and a bunch of text about 10.2.3.5 and even more 45.67.89.2 and don't forget about the fact one could have many more like 23.45.67.1 and 4.5.6.7 and there might be some invalid addresses like 999.1.1.1 and 3.4.5.400 and might even be IPv6 like 0000:0000:0000:0000:0000:0abc:0007:0def 043a:0000:0000:0000:0000:0abc:0007:0def
+
+# Scrape test result
+999.1.1.1 is an invalid IPv4 address
+3.4.5.400 is an invalid IPv4 address
+
+IPv4 Addresses
+192.168.1.1
+10.2.3.5
+45.67.89.2
+23.45.67.1
+4.5.6.7
+
+IPv6 Addresses
+::abc:7:def
+43a::abc:7:def
+
+
+# CIDR collapse test sample
+192.168.10.0/24
+192.168.11.0/24
+10.50.3.0/15
+10.50.4.0/15
+10.60.0.0/16
+10.61.0.0/16
+
+# CIDR collapse result
+10.50.3.0/15 is an invalid IP address
+10.50.4.0/15 is an invalid IP address
+10.60.0.0/15
+192.168.10.0/23
+172.20.0.0/24
+172.20.1.0/24
+172.20.2.0/24
+172.20.3.0/24
+172.20.0.0/24
+172.20.1.0/24
+172.20.2.0/24
+172.20.3.0/24
+
+
