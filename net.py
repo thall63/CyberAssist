@@ -5,11 +5,9 @@
 
 # ::Import::
 import sys
-# import qrc_resources
 import ipaddress
 import re
 from datetime import datetime as dt
-from functools import partial
 from PyQt6.QtGui import QPalette, QColor
 
 from PyQt6.QtGui import QAction, QFont
@@ -170,7 +168,6 @@ class Window(QMainWindow):
         '''
         Event actions
         '''
-        # self.ip_ver_btn.triggered.connect(self.ip_version)
         self.ip_calc_action.triggered.connect(self.calc_ip)
         self.cidr_collapse_action.triggered.connect(self.collapse_ip_subnets)
         self.ip_address_scraper.triggered.connect(self.scrape_ip_address)
@@ -287,6 +284,7 @@ class Window(QMainWindow):
         '''
         self.output_text.clear()
 
+
     def calc_output(self, s):
         '''
         Show calculation in output
@@ -296,6 +294,7 @@ class Window(QMainWindow):
         self.cidr_entry.clear()
         self.ip_entry.setFocus()
         self.ip_calc_action.setDisabled(False)
+
 
 # ::Run Main::
 if __name__ == '__main__':
