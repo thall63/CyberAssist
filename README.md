@@ -8,11 +8,13 @@ All tools are coded with Python and PyQT6. PyQT6 was selected as a GUI Framework
 See https://github.com/thall63/CyberAssist/blob/main/LICENSE
 
 ## Available Apps
-- IP Subnet Helper
+- Net
+  - Net is an IP subnet calculator with extras
   - IP subnet calculation including subnet range, default gateway and a count of the IP contained in the subnet
+  - User defined CIDR mask
   - Provides idenfication of global, private, multicast, reserved, unspecified, loopback and link local IP addresses
-  - Collapse multiple subnets into a single supernet
-  - Scrape valid IP Addresses from unstructured text
+  - Collapses multiple, contiguous subnets into the largest subnet possible
+  - Scrapes valid IP Addresses from unstructured text
 
 ## Coming Soon
 - Maybe you will leave comments and tell me!!!
