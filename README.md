@@ -4,6 +4,9 @@ Cyber Analysts need tools. The CyberAssist Project is a collection of deskside t
 ## Coding
 All tools are coded with Python and PyQT6. PyQT6 was selected as a GUI Framework for it's friendly and fast coding attributes and it's easy to use implementation of PyQT Threads. PyQT Threads improves performance for processing intense calculations. When you are calculating large IP subnets, workers will send your task to multiple threads and run the task in the background. This feature means that the main application will not "freeze" because the apps main event loop is still free to process user actions such as button clicks or dragging the main app to a new location on the desktop. When a task is being processed in this way, the button for submitting the task will be disabled until the task is completed to avoid duplication of the same task and provide the fastest return of data possible. When the task is completed, the button is re-enabled for use.
 
+## Cyber Community
+
+
 ## License
 See https://github.com/thall63/CyberAssist/blob/main/LICENSE
 
