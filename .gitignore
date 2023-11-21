@@ -161,3 +161,5 @@ cython_debug/
 
 # Local files
 *.exe
+*.txt
+!requirements.txt
