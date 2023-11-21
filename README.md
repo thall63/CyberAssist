@@ -22,7 +22,7 @@ See https://github.com/thall63/CyberAssist/blob/main/LICENSE
   - Collapses multiple, contiguous subnets into the largest subnet possible
   - Scrapes valid IP Addresses from unstructured text
 
--Hash
+- Hash
   - Upcomming tool that will create a variety of popular hash values for a file.
 
 ## Coming Soon
