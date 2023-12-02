@@ -105,6 +105,7 @@ class Window(QMainWindow):
         self.ip_entry = QLineEdit(self)
         self.ip_entry.setPlaceholderText('IP Version')
         layout.addWidget(self.ip_entry, 0, 1)
+        self.ip_entry.setDisabled(True)
         #
         self.cidr_label = QLabel('CIDR', self)
         self.cidr_label.setText('CIDR')
@@ -158,6 +159,7 @@ class Window(QMainWindow):
         Event driven actions
         '''
         self.ip_calc_action = QAction('Calculate &IP Subnet', self)
+        self.ip_calc_action.setDisabled(True)
         self.cidr_collapse_action = QAction('Collapse &CIDRs')
         self.ip_address_scraper = QAction('Scrape IP Addresses', self)
         self.copyAction = QAction('C&opy Output', self)
@@ -180,18 +182,24 @@ class Window(QMainWindow):
         Set IP version to IPv4 or IPv6, default is IPv4, and set CIDR range to 32 or 128
         '''
         if self.ip_ver_btn.text() == 'Press to Toggle Version':
+            self.ip_calc_action.setDisabled(False)
+            self.ip_entry.setDisabled(False)
             self.ip_ver_btn.setText('IPv4')
             self.ip_entry.setFocus()
             self.ip_entry.setPlaceholderText('Input IPv4 Address')
             self.cidr_entry.setDisabled(False)
             self.cidr_entry.setRange(0,32)
         elif self.ip_ver_btn.text() == 'IPv4':
+            self.ip_calc_action.setDisabled(False)
+            self.ip_entry.setDisabled(False)
             self.ip_ver_btn.setText('IPv6')
             self.ip_entry.setFocus()
             self.ip_entry.setPlaceholderText('Input IPv6 Address')
             self.cidr_entry.setDisabled(False)
             self.cidr_entry.setRange(0,128)
         elif self.ip_ver_btn.text() == 'IPv6':
+            self.ip_calc_action.setDisabled(True)
+            self.ip_entry.setDisabled(True)
             self.ip_ver_btn.setText('Press to Toggle Version')
             self.ip_entry.setPlaceholderText('IP Version')
             self.cidr_entry.setDisabled(True)
@@ -244,8 +252,8 @@ class Window(QMainWindow):
         IPv4_search = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
         # Need to account for "::" compression in IPv6, below regex only works for fully popluated IPv6 address
         # https://regex101.com/r/cT0hV4/5
-        IPv6_search = re.compile(r'?:^|(?<=\s))(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))(?=\s|$')
-        # IPv6_search = re.compile(r'[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}')
+        # IPv6_search = re.compile(r'?:^|(?<=\s))(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))(?=\s|$')
+        IPv6_search = re.compile(r'[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}')
         IPv4_list = IPv4_search.findall(ip_scraper_multiline)
         IPv4_validated_list = []
         IPv6_list = IPv6_search.findall(ip_scraper_multiline)
