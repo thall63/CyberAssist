@@ -92,8 +92,8 @@ class Window(QMainWindow):
         widget = QWidget(self)
         layout = QGridLayout(widget)
         #
-        self.ip_ver_btn = QPushButton('Press to Toggle Version', self)
-        self.ip_ver_btn.setFixedWidth(210)
+        self.ip_ver_btn = QPushButton('Press to Toggle IP Version', self)
+        self.ip_ver_btn.setFixedWidth(230)
         self.ip_ver_btn.clicked.connect(self.ip_version)
         layout.addWidget(self.ip_ver_btn, 0, 0)
         #
@@ -103,7 +103,7 @@ class Window(QMainWindow):
         layout.addWidget(self.output_text, 1, 0, 1, 4)
         #        
         self.ip_entry = QLineEdit(self)
-        self.ip_entry.setPlaceholderText('IP Version')
+        self.ip_entry.setPlaceholderText('IP Address')
         layout.addWidget(self.ip_entry, 0, 1)
         self.ip_entry.setDisabled(True)
         #
@@ -112,7 +112,8 @@ class Window(QMainWindow):
         layout.addWidget(self.cidr_label, 0, 2)
         #
         self.cidr_entry = QSpinBox(self)
-        self.cidr_entry.setRange(0,128)
+        self.cidr_entry.setDisabled(True)
+        self.cidr_entry.setAccelerated(True)
         self.cidr_entry.setAlignment(Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.cidr_entry, 0, 3)
         #
@@ -135,7 +136,8 @@ class Window(QMainWindow):
         '''
 
         self.main_toolbar = QToolBar('Calculate', self)
-        self.addToolBar(Qt.ToolBarArea.RightToolBarArea, self.main_toolbar)
+        self.main_toolbar.setMovable(False)
+        self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.main_toolbar)
         #
         self.main_toolbar.addAction(self.ip_calc_action)
         self.main_toolbar.addSeparator()
@@ -144,15 +146,13 @@ class Window(QMainWindow):
         self.main_toolbar.addSeparator()
         #
         self.main_toolbar.addAction(self.ip_address_scraper)
+        self.main_toolbar.addSeparator()
         #
-        self.general_toolbar = QToolBar('IO')
-        self.addToolBar(Qt.ToolBarArea.RightToolBarArea, self.general_toolbar)
-        #
-        self.general_toolbar.addAction(self.copyAction)
-        self.general_toolbar.addAction(self.clear_outputAction)
+        self.main_toolbar.addAction(self.copyAction)
+        self.main_toolbar.addSeparator()
+        self.main_toolbar.addAction(self.clear_outputAction)
 
     # ::Control Section::
-    
                                                                                                                                    
     def _createActions(self):      
         '''
@@ -179,9 +179,9 @@ class Window(QMainWindow):
 
     def ip_version(self):
         '''
-        Set IP version to IPv4 or IPv6, default is IPv4, and set CIDR range to 32 or 128
+        Set IP Address to IPv4 or IPv6, default is IPv4, and set CIDR range to 32 or 128
         '''
-        if self.ip_ver_btn.text() == 'Press to Toggle Version':
+        if self.ip_ver_btn.text() == 'Press to Toggle IP Version':
             self.ip_calc_action.setDisabled(False)
             self.ip_entry.setDisabled(False)
             self.ip_ver_btn.setText('IPv4')
@@ -200,8 +200,9 @@ class Window(QMainWindow):
         elif self.ip_ver_btn.text() == 'IPv6':
             self.ip_calc_action.setDisabled(True)
             self.ip_entry.setDisabled(True)
-            self.ip_ver_btn.setText('Press to Toggle Version')
-            self.ip_entry.setPlaceholderText('IP Version')
+            self.ip_ver_btn.setText('Press to Toggle IP Version')
+            self.ip_entry.setPlaceholderText('IP Address')
+            self.cidr_entry.setRange(0,0)
             self.cidr_entry.setDisabled(True)
 
     def calc_ip(self):
@@ -250,11 +251,13 @@ class Window(QMainWindow):
         ipv6_standard_compressed = re.compile('(([A-F0-9]{1,4}:){7}[A-F0-9]{1,4}|(?=([A-F0-9]{0,4}:){0,7}[A-F0-9]{0,4}(?![:.\w]))(([0-9A-F]{1,4}:){1,7}|:)((:[0-9A-F]{1,4}){1,7}|:)|([A-F0-9]{1,4}:){7}:|:(:[A-F0-9]{1,4}){7})', re.IGNORECASE)
         ipv6_mixed_compressed = re.compile('(?:(?:[a-fA-F0-9]{1,4}:){6}|(?=(?:[a-fA-F0-9]{0,4}:){0,6}(?:[0-9]{1,3}\.){3}[0-9]{1,3})(([a-fA-F0-9]{1,4}:){0,5}|:)((:[a-fA-F0-9]{1,4}){1,5}:|:)|::(?:[a-fA-F0-9]{1,4}:){5})(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])', re.IGNORECASE)
 
-        title = "IP Address Search"
+        scrape_title = "IP Address Search"
         label = "Retrieve IPv4 and/or IPv6 addresses"
-        text = "Paste in text containting IPv4 or IPv6 addresses"
-        ip_input_text, ok = QInputDialog.getMultiLineText(self, title, label, text)
-        ip_separator, ok = QInputDialog.getText(self, title, 'Enter a separation character (, ; | or press enter for space delimited)')
+        scrape_text = "Paste in text containting IPv4 or IPv6 addresses"
+        ip_input_text, ok = QInputDialog.getMultiLineText(self, scrape_title, label, scrape_text)
+        sep_title = 'Enter a separation character'
+        sep_label = '(, ; | or press enter for space delimited)'
+        ip_separator, ok = QInputDialog.getText(self, sep_title, sep_label)
         
         if ip_separator == '':
             ip_separator = ' '
@@ -285,6 +288,7 @@ class Window(QMainWindow):
         mixed_notation_text_block = '\n'.join(mixed_compressed_list)
         
         scraped_ip_text = f'IPv4 Addresses:\n{ipv4_text_block}\n\nStandard and Compressed IPv6 Addresses:\n{standard_compressed_text_block}\n\nMixed and Mixed Compressed IPv6 Addresses:\n{mixed_notation_text_block}'
+        self.output_text.clear()
         self.output_text.insertPlainText(scraped_ip_text)
         
     def copy_content(self):
