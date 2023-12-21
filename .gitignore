@@ -163,3 +163,4 @@ cython_debug/
 *.exe
 *.txt
 !requirements.txt
+net/ip_scraper.py
