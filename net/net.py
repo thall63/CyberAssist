@@ -98,7 +98,7 @@ class Window(QMainWindow):
         layout.addWidget(self.ip_ver_btn, 0, 0)
         #
         self.output_text = QTextEdit()
-        self.output_text.setPlaceholderText('IP Calculation Result')
+        self.output_text.setPlaceholderText('Output')
         self.output_text.setAlignment(Qt.AlignmentFlag.AlignLeft)
         layout.addWidget(self.output_text, 1, 0, 1, 4)
         #        
@@ -152,12 +152,8 @@ class Window(QMainWindow):
         self.general_toolbar.addAction(self.clear_outputAction)
 
     # ::Control Section::
-    ipv4_addr = re.compile(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)')
-    ipv6_standard = re.compile('(?:[a-fA-F0-9]{1,4}:){7}[a-fA-F0-9]{1,4}', re.IGNORECASE)
-    ipv6_compressed = re.compile('(([A-F0-9]{1,4}:){7}[A-F0-9]{1,4}|(?=([A-F0-9]{0,4}:){0,7}[A-F0-9]{0,4}(?![:.\w]))(([0-9A-F]{1,4}:){1,7}|:)((:[0-9A-F]{1,4}){1,7}|:)|([A-F0-9]{1,4}:){7}:|:(:[A-F0-9]{1,4}){7})', re.IGNORECASE)
-    ipv6_mixed = re.compile('(?:[a-fA-F0-9]{1,4}:){6}(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])', re.IGNORECASE)
-    ipv6_mixed_compressed = re.compile('(?:(?:[a-fA-F0-9]{1,4}:){6}|(?=(?:[a-fA-F0-9]{0,4}:){0,6}(?:[0-9]{1,3}\.){3}[0-9]{1,3})(([a-fA-F0-9]{1,4}:){0,5}|:)((:[a-fA-F0-9]{1,4}){1,5}:|:)|::(?:[a-fA-F0-9]{1,4}:){5})(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])', re.IGNORECASE)
-                                                                                                                               
+    
+                                                                                                                                   
     def _createActions(self):      
         '''
         Event driven actions
@@ -246,43 +242,50 @@ class Window(QMainWindow):
 
     def scrape_ip_address(self):
         '''
-        Scrape IP addresses from text
+        Scrapes IPv4 and IPv6 addresses from a text file.
+        Return formatted lists of IPv4 and IPv6 addresses.
         '''
-        title = "IP address scraper"
-        label = "IPv4 or IPv6 Address Scraper"
-        text = "Input text containting IPv4 and/or IPv6 Addresses"
-        ip_scraper_multiline, ok = QInputDialog.getMultiLineText(self, title, label, text)
-        self.output_text.clear()
-        IPv4_search = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
-        # Need to account for "::" compression in IPv6, below regex only works for fully popluated IPv6 address
-        # https://regex101.com/r/cT0hV4/5
-        # IPv6_search = re.compile(r'?:^|(?<=\s))(([A-F0-9A-F]{1,4}:){7,7}[A-F0-9A-F]{1,4}|([A-F0-9A-F]{1,4}:){1,7}:|([A-F0-9A-F]{1,4}:){1,6}:[A-F0-9A-F]{1,4}|([A-F0-9A-F]{1,4}:){1,5}(:[A-F0-9A-F]{1,4}){1,2}|([A-F0-9A-F]{1,4}:){1,4}(:[A-F0-9A-F]{1,4}){1,3}|([A-F0-9A-F]{1,4}:){1,3}(:[A-F0-9A-F]{1,4}){1,4}|([A-F0-9A-F]{1,4}:){1,2}(:[A-F0-9A-F]{1,4}){1,5}|[A-F0-9A-F]{1,4}:((:[A-F0-9A-F]{1,4}){1,6})|:((:[A-F0-9A-F]{1,4}){1,7}|:)|fe80:(:[A-F0-9A-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([A-F0-9A-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))(?=\s|$')
-        IPv6_search = re.compile(r'[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}\:[0-9A-Za-z]{1,4}')
-        IPv4_list = IPv4_search.findall(ip_scraper_multiline)
-        IPv4_validated_list = []
-        IPv6_list = IPv6_search.findall(ip_scraper_multiline)
-        IPv6_validated_list = []
-        for ip in IPv4_list:
-            try:
-                ip = ipaddress.ip_address(ip)
-                IPv4_validated_list.append(ip)
-            except ValueError as e:
-                self.output_text.insertPlainText(f'{ip} is an invalid IPv4 address\n')
-        for ip in IPv6_list:
-            try:
-                ip = ipaddress.ip_address(ip)
-                IPv6_validated_list.append(ip)
-            except ValueError as e:
-                self.output_text.insertPlainText(f'{ip} is an invalid IPv6 address\n')
-        self.output_text.insertPlainText('\nIPv4 Addresses\n')
-        IPv4_validated_list = set(IPv4_validated_list)
-        for ip in IPv4_validated_list:
-            self.output_text.insertPlainText(f'{ip}\n')
-        self.output_text.insertPlainText('\nIPv6 Addresses\n')
-        IPv6_validated_list = set(IPv6_validated_list)
-        for ip in IPv6_validated_list:
-            self.output_text.insertPlainText(f'{ip}\n')
+        # ::Regex for Scraper::
+        ipv4_addr = re.compile(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)')
+        ipv6_standard_compressed = re.compile('(([A-F0-9]{1,4}:){7}[A-F0-9]{1,4}|(?=([A-F0-9]{0,4}:){0,7}[A-F0-9]{0,4}(?![:.\w]))(([0-9A-F]{1,4}:){1,7}|:)((:[0-9A-F]{1,4}){1,7}|:)|([A-F0-9]{1,4}:){7}:|:(:[A-F0-9]{1,4}){7})', re.IGNORECASE)
+        ipv6_mixed_compressed = re.compile('(?:(?:[a-fA-F0-9]{1,4}:){6}|(?=(?:[a-fA-F0-9]{0,4}:){0,6}(?:[0-9]{1,3}\.){3}[0-9]{1,3})(([a-fA-F0-9]{1,4}:){0,5}|:)((:[a-fA-F0-9]{1,4}){1,5}:|:)|::(?:[a-fA-F0-9]{1,4}:){5})(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])', re.IGNORECASE)
 
+        title = "IP Address Search"
+        label = "Retrieve IPv4 and/or IPv6 addresses"
+        text = "Paste in text containting IPv4 or IPv6 addresses"
+        ip_input_text, ok = QInputDialog.getMultiLineText(self, title, label, text)
+        ip_separator, ok = QInputDialog.getText(self, title, 'Enter a separation character (, ; | or press enter for space delimited)')
+        
+        if ip_separator == '':
+            ip_separator = ' '
+        
+        ipv4_list = []
+        split_list = ip_input_text.split(ip_separator)
+        for item in split_list:
+            ipv4_result = ipv4_addr.fullmatch(item)
+            if ipv4_result:
+                ipv4_list.append(ipv4_result.group())
+        
+        standard_compressed_list = []
+        split_list = ip_input_text.split(ip_separator)
+        for item in split_list:
+            std_result = ipv6_standard_compressed.fullmatch(item)
+            if std_result:
+                standard_compressed_list.append(std_result.group())
+        
+        mixed_compressed_list = []
+        split_list = ip_input_text.split(ip_separator)
+        for item in split_list:
+            mixed_compressed_result = ipv6_mixed_compressed.fullmatch(item)
+            if mixed_compressed_result:
+                mixed_compressed_list.append(mixed_compressed_result.group())
+        
+        ipv4_text_block = '\n'.join(ipv4_list)
+        standard_compressed_text_block = '\n'.join(standard_compressed_list)
+        mixed_notation_text_block = '\n'.join(mixed_compressed_list)
+        
+        scraped_ip_text = f'IPv4 Addresses:\n{ipv4_text_block}\n\nStandard and Compressed IPv6 Addresses:\n{standard_compressed_text_block}\n\nMixed and Mixed Compressed IPv6 Addresses:\n{mixed_notation_text_block}'
+        self.output_text.insertPlainText(scraped_ip_text)
         
     def copy_content(self):
         '''
