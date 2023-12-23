@@ -19,7 +19,7 @@ See https://github.com/thall63/CyberAssist/blob/main/LICENSE
   - IP subnet calculation including subnet range, default gateway and a count of the IP contained in the subnet
   - User defined CIDR mask
   - Provides idenfication of global, private, multicast, reserved, unspecified, loopback and link local IP addresses
-  - Collapses multiple, contiguous subnets into the largest subnet possible
+  - Collapses multiple, contiguous IPv4 subnets into the largest subnet possible
   - Scrapes valid IP Addresses from unstructured text. IP addresses may be both IPv4 and IPv6 within an unstructed text. IP addresses must be delimited by (space , ; or |). The scrape functionality considers only "full matches". Continuous, non-delimited text would produce valid matches from within invalid IP addresses. Therefore, non-delimited addresses cannot be matched reliably and is not supported.
 
 - Hash
