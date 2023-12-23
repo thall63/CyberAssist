@@ -1,7 +1,7 @@
 # net ranger is an IPv4/IPv6 subnet calculation tool. 
 # Both IPv4 and IPv6 networks are calculated based on the IP address and subnet mask provided.
 # IP Scraper will find and return all valid IPv4 and IPv6 addresses from a text input.
-# CIDR Collapse will collapse all IPv4 and IPv6 CIDRs to the smallest possible CIDR.
+# CIDR Collapse will collapse IPv4 CIDRs to the smallest possible CIDR.
 
 # ::Import::
 import sys
@@ -160,8 +160,8 @@ class Window(QMainWindow):
         '''
         self.ip_calc_action = QAction('Calculate &IP Subnet', self)
         self.ip_calc_action.setDisabled(True)
-        self.cidr_collapse_action = QAction('Collapse &CIDRs')
-        self.ip_address_scraper = QAction('Scrape IP Addresses', self)
+        self.cidr_collapse_action = QAction('Collapse IPv4 &CIDRs')
+        self.ip_address_scraper = QAction('Scrape \nIPv4 and IPv6 \nAddresses', self)
         self.copyAction = QAction('C&opy Output', self)
         self.clear_outputAction = QAction('Clear &Output', self)
        
@@ -223,12 +223,20 @@ class Window(QMainWindow):
         '''
         Collapse IP subnet CIDRs
         '''
+        self.output_text.clear()
         title = "Collapse CIDRs"
-        label = "Collapse IPv4 and/or IPv6 CIDRs"
-        text = "Input text containting IPv4 or IPv6 CIDRs"
-        ip_collapse_multiline, ok = QInputDialog.getMultiLineText(self, title, label, text)
-        text_search = re.compile(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/[0-9]{1,2}')
-        cidr_list = text_search.findall(ip_collapse_multiline)
+        label = "Collapse IPv4 CIDRs"
+        text = "Input text containting IPv4 CIDRs"
+        ip_cidr_entry, ok = QInputDialog.getMultiLineText(self, title, label, text)
+        if ok == False:
+            return
+        ipv4_cidr = re.compile(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]()|2[0-4][0-9]|[01]?[0-9][0-9]?\/([2-3][0-2]|[2][3-9]|[1][0-9]|[0-9]))')
+        split_list = ip_cidr_entry.split()
+        cidr_list = []
+        for item in split_list:
+            ip_cidr_result = ipv4_cidr.fullmatch(item)
+            if ip_cidr_result:
+                cidr_list.append(ip_cidr_result.group())  
         cidr_validated_list = []
         for cidr in cidr_list:
             try:
@@ -237,7 +245,7 @@ class Window(QMainWindow):
             except ValueError as e:
                 self.output_text.insertPlainText(f'{cidr} is not a valid IP CIDR\n')
         collapsed_cidr = ipaddress.collapse_addresses(cidr_validated_list)
-        self.output_text.insertPlainText('\nCollapsed CIDRs\n')
+        self.output_text.insertPlainText('Collapsed CIDRs\n')
         for collapsed in collapsed_cidr:
             self.output_text.insertPlainText(f'{collapsed}\n')
 
@@ -246,6 +254,9 @@ class Window(QMainWindow):
         Scrapes IPv4 and IPv6 addresses from a text file.
         Return formatted lists of IPv4 and IPv6 addresses.
         '''
+        # Clear output text
+        self.output_text.clear()
+
         # ::Regex for Scraper::
         ipv4_addr = re.compile(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)')
         ipv6_standard_compressed = re.compile('(([A-F0-9]{1,4}:){7}[A-F0-9]{1,4}|(?=([A-F0-9]{0,4}:){0,7}[A-F0-9]{0,4}(?![:.\w]))(([0-9A-F]{1,4}:){1,7}|:)((:[0-9A-F]{1,4}){1,7}|:)|([A-F0-9]{1,4}:){7}:|:(:[A-F0-9]{1,4}){7})', re.IGNORECASE)
@@ -255,9 +266,14 @@ class Window(QMainWindow):
         label = "Retrieve IPv4 and/or IPv6 addresses"
         scrape_text = "Paste in text containting IPv4 or IPv6 addresses"
         ip_input_text, ok = QInputDialog.getMultiLineText(self, scrape_title, label, scrape_text)
-        sep_title = 'Enter a separation character'
-        sep_label = '(, ; | or press enter for space delimited)'
-        ip_separator, ok = QInputDialog.getText(self, sep_title, sep_label)
+        if ok == True:
+            sep_title = 'Enter a separation character'
+            sep_label = '(, ; | or press enter for space delimited)'
+            ip_separator, ok = QInputDialog.getText(self, sep_title, sep_label)
+            if ok == False:
+                return
+        else:
+            return
         
         if ip_separator == '':
             ip_separator = ' '
