@@ -6,6 +6,7 @@ import sys
 import hashlib
 import zlib
 import re
+from vt import VT
 from datetime import datetime as dt
 from PyQt6.QtGui import QPalette, QColor
 
@@ -59,6 +60,9 @@ class TBD(QRunnable):
         '''
         pass
 
+# ::Virus Total::
+vt = VT('d582a30685f1836aa401fabe0d2802d3b35eb5f8ff4b5bc18d745da0ea0e0b93')
+
 # ::View::
 class Window(QMainWindow):
     def __init__(self):
@@ -90,6 +94,10 @@ class Window(QMainWindow):
         self.file_button = QPushButton('Select File', self)
         layout.addWidget(self.file_button, 0, 1)
         #
+        self.get_hash = QInputDialog(self)
+        self.vt_hash_button = QPushButton('VT Hash', self)
+        layout.addWidget(self.vt_hash_button, 1, 0)
+        #
         self.setCentralWidget(widget)
         self._createStatusBar()
         self._connectActions()
@@ -113,23 +121,31 @@ class Window(QMainWindow):
         self.file_button.clicked.connect(self.file_hash)
         self.clear_output_button.clicked.connect(self.clear_output)
         self.copy_output_button.clicked.connect(self.copy_content)
-
+        self.vt_hash_button.clicked.connect(self.vt_hash)
 
     def file_hash(self):
         '''
         Create a set of hashes for a file
         '''
+        algo_list = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512']
         self.output_text.clear()
         hash_algorithm = self.hash_type.currentText()
         file_name, file_types = self.open_file.getOpenFileName()
         if file_name and hash_algorithm != 'All':
+            self.hash_output(f'File: {file_name}\n\n')
             file_object = open(file_name, 'rb')
             file_hash = eval(f'hashlib.{hash_algorithm}()')
             file_hash.update(file_object.read())
             hash_string = file_hash.hexdigest()
             self.hash_output(f'{hash_algorithm}: {hash_string}')
         elif file_name and hash_algorithm == 'All':
-            self.hash_output('All Hashes: \n')
+            self.hash_output(f'File: {file_name}\n\n')
+            for algo in algo_list:
+                file_object = open(file_name, 'rb')
+                file_hash = eval(f'hashlib.{algo}()')
+                file_hash.update(file_object.read())
+                hash_string = file_hash.hexdigest()
+                self.hash_output(f'{algo}: {hash_string}\n')
         else:
             self.hash_output('No valid file selected')
        
@@ -153,6 +169,15 @@ class Window(QMainWindow):
         Show calculation in output
         '''
         self.output_text.insertPlainText(s)
+
+    def vt_hash(self):
+        '''
+        Submit a hash to Virus Total
+        '''
+        hash_value, ok = self.get_hash.getText(self, 'Virus Total Hash', 'Enter a hash to submit to Virus Total')
+        if ok:
+            vt_data = vt.get_hash(hash_value)
+            self.hash_output(f'Hash: {hash_value}\nData:{vt_data}\n')
 
 
 # ::Run Main::
