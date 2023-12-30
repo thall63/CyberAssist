@@ -30,6 +30,7 @@ from PyQt6.QtWidgets import (
     QWidget,
     QComboBox,
     QFileDialog,
+    QMessageBox,
     QLineEdit,
     QSpinBox,
     QTableView,
@@ -60,13 +61,11 @@ class TBD(QRunnable):
         '''
         pass
 
-# ::Virus Total::
-vt = VT('d582a30685f1836aa401fabe0d2802d3b35eb5f8ff4b5bc18d745da0ea0e0b93')
-
 # ::View::
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.vt_key = ''
         self.threadpool = QThreadPool()
         self.setWindowTitle('Net')
         self.setFont(QFont('Arial', 14))
@@ -98,6 +97,13 @@ class Window(QMainWindow):
         self.vt_hash_button = QPushButton('VT Hash', self)
         layout.addWidget(self.vt_hash_button, 1, 0)
         #
+        self.get_key = QInputDialog(self)
+        self.vt_key_button = QPushButton('VT Key', self)
+        layout.addWidget(self.vt_key_button, 1, 1)
+        #
+        self.msgBox = QMessageBox(self)
+        self.msgBox.setIcon(QMessageBox.Icon.Information)
+        #
         self.setCentralWidget(widget)
         self._createStatusBar()
         self._connectActions()
@@ -122,6 +128,7 @@ class Window(QMainWindow):
         self.clear_output_button.clicked.connect(self.clear_output)
         self.copy_output_button.clicked.connect(self.copy_content)
         self.vt_hash_button.clicked.connect(self.vt_hash)
+        self.vt_key_button.clicked.connect(self.get_vtkey)
 
     def file_hash(self):
         '''
@@ -170,16 +177,30 @@ class Window(QMainWindow):
         '''
         self.output_text.insertPlainText(s)
 
+    def get_vtkey(self):
+        '''
+        Set Virus Total API key
+        '''
+        key, ok = self.get_key.getText(self, 'Virus Total Key', 'Enter your Virus Total API key')
+        if ok:
+            self.vt_key = key
+            self.msgBox.setWindowTitle('Virus Total API Key Set') 
+            self.msgBox.setDetailedText(f"Virus Total API key set as\n{self.vt_key}.\nKey will remain set until application is closed or key is changed.\n\nTo change the key, click the 'VT Key' button again.")
+            self.msgBox.exec()
+
     def vt_hash(self):
         '''
         Submit a hash to Virus Total
         Add prommpt for API key
         '''
+        vt = VT(self.vt_key)
         hash_value, ok = self.get_hash.getText(self, 'Virus Total Hash', 'Enter a hash to submit to Virus Total')
         if ok:
-            vt_data = vt.get_hash(hash_value)
-            self.hash_output(f'{vt_data}')
-
+            try:
+                vt_data = vt.get_hash(hash_value)
+                self.hash_output(f'{vt_data}')
+            except Exception as e:
+                self.hash_output(f'Error: {e}')
 
 # ::Run Main::
 if __name__ == '__main__':
