@@ -87,19 +87,22 @@ class Window(QMainWindow):
         self.hash_type.setPlaceholderText('Hash Type')
         self.hash_type.setDisabled(False)
         self.hash_type.addItems(['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'sha3_224', 'sha3_256', 'sha3_384', 'sha3_512','All'])
-        layout.addWidget(self.hash_type, 0, 0)
+        layout.addWidget(self.hash_type, 1, 0)
+        self.hash_type.setEditable(True)
+        self.hash_type.setCurrentText('Hash Type')
         #
         self.open_file = QFileDialog(self)
         self.file_button = QPushButton('Select File', self)
-        layout.addWidget(self.file_button, 0, 1)
+        layout.addWidget(self.file_button, 1, 1)
+        self.file_button.setDisabled(True)
         #
         self.get_hash = QInputDialog(self)
         self.vt_hash_button = QPushButton('VT Hash', self)
-        layout.addWidget(self.vt_hash_button, 1, 0)
+        layout.addWidget(self.vt_hash_button, 0, 0)
         #
         self.get_key = QInputDialog(self)
         self.vt_key_button = QPushButton('VT Key', self)
-        layout.addWidget(self.vt_key_button, 1, 1)
+        layout.addWidget(self.vt_key_button, 0, 1)
         #
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
@@ -125,11 +128,19 @@ class Window(QMainWindow):
         Event actions
         '''
         self.file_button.clicked.connect(self.file_hash)
+        self.hash_type.activated.connect(self.enable_file_button)
         self.clear_output_button.clicked.connect(self.clear_output)
         self.copy_output_button.clicked.connect(self.copy_content)
         self.vt_hash_button.clicked.connect(self.vt_hash)
         self.vt_key_button.clicked.connect(self.get_vtkey)
 
+    def enable_file_button(self):
+        '''
+        Enable file button
+        '''
+        self.file_button.setDisabled(False)
+
+    
     def file_hash(self):
         '''
         Create a set of hashes for a file
@@ -155,6 +166,8 @@ class Window(QMainWindow):
                 self.hash_output(f'{algo}: {hash_string}\n')
         else:
             self.hash_output('No valid file selected')
+        self.file_button.setDisabled(True)
+        self.hash_type.setCurrentText('Hash Type')
        
     def copy_content(self):
         '''
