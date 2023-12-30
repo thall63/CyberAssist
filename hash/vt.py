@@ -32,4 +32,4 @@ class VT:
             report = f'File Hash: {hash}\n\nType: {type_description}\nReputation: {reputation}\n\nTotal Votes:\n{total_votes_data}\n\nResults:\n{results_data}'
             return report
         except Exception as e:
-            return f'No data returned for {hash}'
+            return f'No data returned for {hash}:: {e}'
