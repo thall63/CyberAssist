@@ -98,6 +98,7 @@ class Window(QMainWindow):
         #
         self.get_hash = QInputDialog(self)
         self.vt_hash_button = QPushButton('VT Hash', self)
+        self.vt_hash_button.setDisabled(True)
         layout.addWidget(self.vt_hash_button, 0, 0)
         #
         self.get_key = QInputDialog(self)
@@ -134,11 +135,23 @@ class Window(QMainWindow):
         self.vt_hash_button.clicked.connect(self.vt_hash)
         self.vt_key_button.clicked.connect(self.get_vtkey)
 
+    
+    def regex_validate(self, hash_value):
+        '''
+        Validate hash value
+        '''
+        regex = re.compile(r'^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$')
+        if regex.match(hash_value):
+            return True
+        else:
+            return False
+    
     def enable_file_button(self):
         '''
         Enable file button
         '''
         self.file_button.setDisabled(False)
+        self.clear_output()
 
     
     def file_hash(self):
@@ -200,20 +213,27 @@ class Window(QMainWindow):
             self.msgBox.setWindowTitle('Virus Total API Key Set') 
             self.msgBox.setDetailedText(f"Virus Total API key set as\n{self.vt_key}.\nKey will remain set until application is closed or key is changed.\n\nTo change the key, click the 'VT Key' button again.")
             self.msgBox.exec()
+            self.vt_hash_button.setDisabled(False)
 
     def vt_hash(self):
         '''
         Submit a hash to Virus Total
         Add prommpt for API key
         '''
+        self.clear_output()
         vt = VT(self.vt_key)
-        hash_value, ok = self.get_hash.getText(self, 'Virus Total Hash', 'Enter a hash to submit to Virus Total')
+        hash_value, ok = self.get_hash.getText(self, 'Virus Total Hash', 'Enter an MD5, SHA1 or SHA256 hash only')
         if ok:
-            try:
-                vt_data = vt.get_hash(hash_value)
-                self.hash_output(f'{vt_data}')
-            except Exception as e:
-                self.hash_output(f'Error: {e}')
+            valid_hash = self.regex_validate(hash_value)
+            if valid_hash:
+                try:
+                    vt_data = vt.get_hash(hash_value)
+                    self.output_text.clear()
+                    self.hash_output(f'{vt_data}')
+                except KeyError as e:
+                    self.hash_output(f'Error: {e}')
+            else:
+                self.hash_output('Invalid hash value')
 
 # ::Run Main::
 if __name__ == '__main__':
