@@ -173,11 +173,12 @@ class Window(QMainWindow):
     def vt_hash(self):
         '''
         Submit a hash to Virus Total
+        Add prommpt for API key
         '''
         hash_value, ok = self.get_hash.getText(self, 'Virus Total Hash', 'Enter a hash to submit to Virus Total')
         if ok:
             vt_data = vt.get_hash(hash_value)
-            self.hash_output(f'Hash: {hash_value}\nData:{vt_data}\n')
+            self.hash_output(f'{vt_data}')
 
 
 # ::Run Main::
