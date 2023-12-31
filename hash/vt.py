@@ -39,6 +39,7 @@ class VT:
                 threat_names.append(threat_name)
             threat_names = ', '.join(threat_names)
             total_votes_data = '\n'.join(total_votes_list)
+            malicious_list.sort()
             results_data = '\n'.join(malicious_list)
             total_malicious = len(malicious_list)
             report = f'File Hash: {hash}\n\nType: {type_description}\nThreat Names: {threat_names}\nThreat Label: {threat_label}\nReputation: {reputation}\n\nTotal Votes:\n{total_votes_data}\n\n{total_malicious} Vendors identified this hash as malicious:\n{results_data}\n\n'
@@ -47,5 +48,5 @@ class VT:
             error_message = self.answer['error']['message']
             error_cred = self.answer['error']['code']
             return f'No Virus Total data returned for {hash}\n\nError message: {error_message}\nError Type:  {error_cred}\n\nRe-enter your personal VT key'
-        except Exception as e:
-            return f'No Virus Total data available for {hash}::{e}'
+        except Exception:
+            return f'No Virus Total data available for {hash}'
