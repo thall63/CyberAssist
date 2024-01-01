@@ -23,11 +23,15 @@ See https://github.com/thall63/CyberAssist/blob/main/LICENSE
   - Scrapes valid IP Addresses from unstructured text. IP addresses may be both IPv4 and IPv6 within an unstructed text. IP addresses must be delimited by (space , ; or |). The scrape functionality considers only "full matches". Continuous, non-delimited text would produce valid matches from within invalid IP addresses. Therefore, non-delimited addresses cannot be matched reliably and is not supported.
   ![](/net/net_screenshot.jpg)
 
+  ![](net/net_screenshot.jpg)
+
 - Hash
   - Hash is a file hashing tool with extras
   - Create a hash of any file. Many hash types are available or generate all hashes. Hash types include md5, sha1, sha224, sha256, sha384, sha512, sha3_224, sha3_256, sha3_384, and sha3_512
   - Submit any hash of type md5, sha-1 or sha-256 to Virus Total (Requires Virus Total personal API token)
-  ![](/hash/hash_screenshot.jpg)
+
+  ![](hash/hash_screenshot.jpg)
+
 
 ## Coming Soon
 - Maybe you will leave comments and tell me!!!
