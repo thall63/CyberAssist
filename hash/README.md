@@ -1,5 +1,5 @@
 # Hash
-Hash is GUI interface for hashing files and submitting file hashes to Virus Total.{}
+Hash is GUI interface for hashing files and submitting file hashes to Virus Total.
 
 ![](hash_screenshot.jpg)
 
