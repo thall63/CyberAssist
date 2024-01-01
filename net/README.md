@@ -1,6 +1,8 @@
 # Net
 Net is GUI interface for subnetting, summarizing and scraping IP addresses. IPv4 and IPv6 options are available.
 
+![](net_screenshot.jpg)
+
 ## Install
 Simply install PyQt6 into your python environment, *pip install PyQt6*. The main package "net.py" may be compiled to run conventiently as a single file executable. I recommend "pyinstaller" for creating a single "exe" file that runs on Windows environments. The *requirements.txt* file lists the individual PyQt6 packages and versions used. All other imports are Python "*built-ins*". A compiled "release" is also planned with the first stable version of the code. Check the CyberAssist Project github page for the compiled release. Place the executable anywhere on your Windows 10 or higher PC and doubleclick.
 
