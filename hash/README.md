@@ -13,3 +13,4 @@ See https://github.com/thall63/CyberAssist/blob/main/LICENSE
 - Hash is a file hashing tool with extras
 - Create a hash of any file. Many hash types are available or generate all hashes. Hash types include md5, sha1, sha224, sha256, sha384, sha512, sha3_224, sha3_256, sha3_384, and sha3_512
 - Submit any hash of type md5, sha-1 or sha-256 to Virus Total (Requires Virus Total personal API token)
+- Returns Virus Total reputaion and vendors who have flagged the hash value as malicious
