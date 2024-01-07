@@ -47,7 +47,7 @@ class IP_calculate(QRunnable):
 
     def __init__(self, ip, ip_cidr):
             super().__init__()
-            self.signals = (ThreadSignal())
+            self.signals = ThreadSignal()
             self.ip = ip
             self.ip_cidr = ip_cidr
 
@@ -58,7 +58,6 @@ class IP_calculate(QRunnable):
         self.kwargs.
         '''
         try:
-            start_time = dt.now()
             ip_addr = ipaddress.ip_address(self.ip)
             global_ip = ip_addr.is_global
             multicast_ip = ip_addr.is_multicast
@@ -68,13 +67,10 @@ class IP_calculate(QRunnable):
             loopback_ip = ip_addr.is_loopback
             link_local = ip_addr.is_link_local
             ip_net = ipaddress.ip_network(f'{self.ip}/{self.ip_cidr}', strict=False)
-            ip_host_list = list(ip_net.hosts()) 
-            first_host = ip_host_list[0]
-            last_host = ip_host_list[-1]
-            total_hosts = '{:,}'.format(len(ip_host_list))
-            end_time = dt.now()
-            total_time = end_time - start_time
-            self.net_range = f'IP Address:  {ip_addr}\nGlobal IP:   {global_ip}\nPrivate IP:   {private_ip}\nMulticast IP:   {multicast_ip}\nReserved IP:   {reserved_ip}\nUnspecified IP:   {unspecified_ip}\nLoopback Address:   {loopback_ip}\nLink Local:   {link_local}\nIP Subnet:  {ip_net}\nFirst Host:  {first_host}\nLast Host:  {last_host}\nTotal Hosts:  {total_hosts}\nTotal Calculation Time:  {total_time.total_seconds()} seconds'
+            first_host = ip_net[0]
+            last_host = ip_net[-1]
+            total_hosts = '{:,}'.format(ip_net.num_addresses)
+            self.net_range = f'IP Address:  {ip_addr}\nGlobal IP:   {global_ip}\nPrivate IP:   {private_ip}\nMulticast IP:   {multicast_ip}\nReserved IP:   {reserved_ip}\nUnspecified IP:   {unspecified_ip}\nLoopback Address:   {loopback_ip}\nLink Local:   {link_local}\nIP Network:  {ip_net}\nFirst Host:  {first_host}\nLast Host:  {last_host}\nTotal Hosts:  {total_hosts}\n'
             self.signals.result.emit(self.net_range)
         except Exception as e:
             self.signals.error.emit(f'Invalid IP address, please try again --> {e}')
@@ -107,8 +103,8 @@ class Window(QMainWindow):
         layout.addWidget(self.ip_entry, 0, 1)
         self.ip_entry.setDisabled(True)
         #
-        self.cidr_label = QLabel('CIDR', self)
-        self.cidr_label.setText('CIDR')
+        self.cidr_label = QLabel('Prefix', self)
+        self.cidr_label.setText('Prefix')
         layout.addWidget(self.cidr_label, 0, 2)
         #
         self.cidr_entry = QSpinBox(self)
@@ -116,6 +112,11 @@ class Window(QMainWindow):
         self.cidr_entry.setAccelerated(True)
         self.cidr_entry.setAlignment(Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.cidr_entry, 0, 3)
+        #
+        self.view_mode_btn = QPushButton('Moon', self)
+        self.view_mode_btn.setFixedWidth(100)
+        self.view_mode_btn.clicked.connect(self.view_mode)
+        layout.addWidget(self.view_mode_btn, 0, 4)
         #
         self.setCentralWidget(widget)
         self._createStatusBar() 
@@ -144,6 +145,9 @@ class Window(QMainWindow):
         #
         self.main_toolbar.addAction(self.cidr_collapse_action)
         self.main_toolbar.addSeparator()
+        #   
+        self.main_toolbar.addAction(self.collapsed_ipv6_prefixes)
+        self.main_toolbar.addSeparator()
         #
         self.main_toolbar.addAction(self.ip_address_scraper)
         self.main_toolbar.addSeparator()
@@ -161,6 +165,7 @@ class Window(QMainWindow):
         self.ip_calc_action = QAction('Calculate &IP Subnet', self)
         self.ip_calc_action.setDisabled(True)
         self.cidr_collapse_action = QAction('Collapse IPv4 &CIDRs')
+        self.collapsed_ipv6_prefixes = QAction('Collapse IPv6 Prefixes')
         self.ip_address_scraper = QAction('Scrape \nIPv4 and IPv6 \nAddresses', self)
         self.copyAction = QAction('C&opy Output', self)
         self.clear_outputAction = QAction('Clear &Output', self)
@@ -172,6 +177,7 @@ class Window(QMainWindow):
         '''
         self.ip_calc_action.triggered.connect(self.calc_ip)
         self.cidr_collapse_action.triggered.connect(self.collapse_ip_subnets)
+        self.collapsed_ipv6_prefixes.triggered.connect(self.collapse_ipv6_prefixes)
         self.ip_address_scraper.triggered.connect(self.scrape_ip_address)
         self.copyAction.triggered.connect(self.copy_content)
         self.clear_outputAction.triggered.connect(self.clear_output)
@@ -184,6 +190,7 @@ class Window(QMainWindow):
         if self.ip_ver_btn.text() == 'Press to Toggle IP Version':
             self.ip_calc_action.setDisabled(False)
             self.ip_entry.setDisabled(False)
+            self.clear_output()
             self.ip_ver_btn.setText('IPv4')
             self.ip_entry.setFocus()
             self.ip_entry.setPlaceholderText('Input IPv4 Address')
@@ -192,6 +199,7 @@ class Window(QMainWindow):
         elif self.ip_ver_btn.text() == 'IPv4':
             self.ip_calc_action.setDisabled(False)
             self.ip_entry.setDisabled(False)
+            self.clear_output()
             self.ip_ver_btn.setText('IPv6')
             self.ip_entry.setFocus()
             self.ip_entry.setPlaceholderText('Input IPv6 Address')
@@ -200,6 +208,7 @@ class Window(QMainWindow):
         elif self.ip_ver_btn.text() == 'IPv6':
             self.ip_calc_action.setDisabled(True)
             self.ip_entry.setDisabled(True)
+            self.clear_output()
             self.ip_ver_btn.setText('Press to Toggle IP Version')
             self.ip_entry.setPlaceholderText('IP Address')
             self.cidr_entry.setRange(0,0)
@@ -230,24 +239,49 @@ class Window(QMainWindow):
         ip_cidr_entry, ok = QInputDialog.getMultiLineText(self, title, label, text)
         if ok == False:
             return
-        ipv4_cidr = re.compile(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]()|2[0-4][0-9]|[01]?[0-9][0-9]?\/([2-3][0-2]|[2][3-9]|[1][0-9]|[0-9]))')
-        split_list = ip_cidr_entry.split()
-        cidr_list = []
-        for item in split_list:
-            ip_cidr_result = ipv4_cidr.fullmatch(item)
-            if ip_cidr_result:
-                cidr_list.append(ip_cidr_result.group())  
+        cidr_list = ip_cidr_entry.split() 
         cidr_validated_list = []
-        for cidr in cidr_list:
+        cidr_invalidated_list = []
+        for item in cidr_list:
             try:
-                cidr = ipaddress.ip_network(cidr)
+                cidr = ipaddress.ip_network(item, strict=False)
                 cidr_validated_list.append(cidr)
             except ValueError as e:
-                self.output_text.insertPlainText(f'{cidr} is not a valid IP CIDR\n')
+                cidr_invalidated_list.append(item)
         collapsed_cidr = ipaddress.collapse_addresses(cidr_validated_list)
-        self.output_text.insertPlainText('Collapsed CIDRs\n')
-        for collapsed in collapsed_cidr:
-            self.output_text.insertPlainText(f'{collapsed}\n')
+        collapsed_cidr = '\n'.join(str(item) for item in collapsed_cidr)
+        self.output_text.insertPlainText(f'Collapsed CIDRs\n{collapsed_cidr}\n')
+        invalid_cidr = '\n'.join(cidr_invalidated_list)
+        self.output_text.insertPlainText(f'\nInvalid CIDRs\n{invalid_cidr}')
+
+
+    def collapse_ipv6_prefixes(self):
+        '''
+        Collapse IPv6 prefix CIDRs
+        '''
+        self.output_text.clear()
+        title = "Collapse CIDRs"
+        label = "Collapse IPv6 CIDRs"
+        text = "Input text containting IPv6 CIDRs"
+        ipv6_entry, ok = QInputDialog.getMultiLineText(self, title, label, text)
+        if ok == False:
+            return
+        split_list = ipv6_entry.split()
+        prefix_validated_list = []
+        prefix_invalidated_list = []
+        for item in split_list:
+            try:
+                ipv6_net = ipaddress.ip_network(f'{item}', strict=False)
+                if ipv6_net:
+                    prefix_validated_list.append(ipv6_net)
+            except ValueError as e:
+                prefix_invalidated_list.append(item)
+        collapsed_ipv6_prefixes = ipaddress.collapse_addresses(prefix_validated_list)
+        collapsed_ipv6_prefixes = '\n'.join(str(item) for item in collapsed_ipv6_prefixes)
+        self.output_text.insertPlainText(f'Collapsed IPv6 Prefixes\n{collapsed_ipv6_prefixes}\n')
+        invalid_ipv6_prefixes = '\n'.join(str(item) for item in prefix_invalidated_list)
+        self.output_text.insertPlainText(f'\nInvalid IPv6 Prefixes\n{invalid_ipv6_prefixes}')   
+
 
     def scrape_ip_address(self):
         '''
@@ -266,45 +300,32 @@ class Window(QMainWindow):
         label = "Retrieve IPv4 and/or IPv6 addresses"
         scrape_text = "Paste in text containting IPv4 or IPv6 addresses"
         ip_input_text, ok = QInputDialog.getMultiLineText(self, scrape_title, label, scrape_text)
-        if ok == True:
-            sep_title = 'Enter a separation character'
-            sep_label = '(, ; | or press enter for space delimited)'
-            ip_separator, ok = QInputDialog.getText(self, sep_title, sep_label)
-            if ok == False:
-                return
-        else:
-            return
-        
-        if ip_separator == '':
-            ip_separator = ' '
-        
+        ip_input_list = []
         ipv4_list = []
-        split_list = ip_input_text.split(ip_separator)
-        for item in split_list:
+        if ok == True:
+            ip_input_list = ip_input_text.split()
+        else:
+            return      
+        for item in ip_input_list:
             ipv4_result = ipv4_addr.fullmatch(item)
             if ipv4_result:
                 ipv4_list.append(ipv4_result.group())
-        
         standard_compressed_list = []
-        split_list = ip_input_text.split(ip_separator)
-        for item in split_list:
+        for item in ip_input_list:
             std_result = ipv6_standard_compressed.fullmatch(item)
             if std_result:
                 standard_compressed_list.append(std_result.group())
-        
         mixed_compressed_list = []
-        split_list = ip_input_text.split(ip_separator)
-        for item in split_list:
+        for item in ip_input_list:
             mixed_compressed_result = ipv6_mixed_compressed.fullmatch(item)
             if mixed_compressed_result:
                 mixed_compressed_list.append(mixed_compressed_result.group())
-        
-        ipv4_text_block = '\n'.join(ipv4_list)
-        standard_compressed_text_block = '\n'.join(standard_compressed_list)
-        mixed_notation_text_block = '\n'.join(mixed_compressed_list)
-        
+        ipv4_text_block = '\n'.join(list(set(ipv4_list)))
+        standard_compressed_text_block = '\n'.join(list(set(standard_compressed_list)))
+        mixed_notation_text_block = '\n'.join(list(set(mixed_compressed_list)))
         scraped_ip_text = f'IPv4 Addresses:\n{ipv4_text_block}\n\nStandard and Compressed IPv6 Addresses:\n{standard_compressed_text_block}\n\nMixed and Mixed Compressed IPv6 Addresses:\n{mixed_notation_text_block}'
         self.output_text.clear()
+        # Consider not printing scraped lists that are empty
         self.output_text.insertPlainText(scraped_ip_text)
         
     def copy_content(self):
@@ -332,22 +353,49 @@ class Window(QMainWindow):
         self.ip_entry.setFocus()
         self.ip_calc_action.setDisabled(False)
 
+    def view_mode(self):
+        '''
+        Sun of Moon Mode
+        '''
+        mode = self.view_mode_btn.text()
+        if mode == 'Sun':
+            self.view_mode_btn.setText('Moon')
+            self.sun_palette = QPalette()
+            self.sun_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.white)
+            self.sun_palette.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.white)
+            self.sun_palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.black)
+            self.sun_palette.setColor(QPalette.ColorRole.Button, Qt.GlobalColor.white)
+            self.sun_palette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.black)
+            self.sun_palette.setColor(QPalette.ColorRole.PlaceholderText, Qt.GlobalColor.darkGray)
+            self.sun_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, Qt.GlobalColor.black)
+            self.setPalette(self.sun_palette)
+        elif mode == 'Moon':
+            self.view_mode_btn.setText('Sun')
+            self.moon_palette = QPalette()
+            self.moon_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.transparent)
+            self.moon_palette.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.gray)
+            self.moon_palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.black)
+            self.moon_palette.setColor(QPalette.ColorRole.Button, Qt.GlobalColor.white)
+            self.moon_palette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.black)
+            self.moon_palette.setColor(QPalette.ColorRole.PlaceholderText, Qt.GlobalColor.darkGray)
+            self.moon_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, Qt.GlobalColor.black)
+            self.setPalette(self.moon_palette)
+
 
 # ::Run Main::
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    # app.setStyle('Fusion')
+    app = QApplication(sys.argv)    # app.setStyle('Fusion')
     palette = QPalette()
     palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.white)
-    palette.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.lightGray)
-    palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
+    palette.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.white)
+    palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.black)
     palette.setColor(QPalette.ColorRole.Button, Qt.GlobalColor.white)
     palette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.black)
     palette.setColor(QPalette.ColorRole.PlaceholderText, Qt.GlobalColor.darkGray)
-    palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, Qt.GlobalColor.gray)
+    palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, Qt.GlobalColor.black)
     app.setPalette(palette)
     win = Window()
-    win.setWindowTitle('IP Subnet Helper')
+    win.setWindowTitle('Net')
     # base = win.baseSize()
     # win.setBaseSize(base)
     win.show()

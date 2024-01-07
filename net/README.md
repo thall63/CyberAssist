@@ -10,9 +10,14 @@ Simply install PyQt6 into your python environment, *pip install PyQt6*. The main
 See https://github.com/thall63/CyberAssist/blob/main/LICENSE
 
 ## Features
-- Net is an IP subnet calculator with extras
-- IP subnet calculation including subnet range, default gateway and a count of the IP contained in the subnet
-- User defined CIDR mask
-- Provides idenfication of global, private, multicast, reserved, unspecified, loopback and link local IP addresses
-- Collapses multiple, contiguous IPv4 subnets into the largest subnet possible
-- Scrapes valid IP Addresses from unstructured text. IP addresses may be both IPv4 and IPv6 within an unstructed text. IP addresses must be delimited by (space , ; or |). The scrape functionality considers only "full matches". Continuous, non-delimited text would produce valid matches from within invalid IP addresses. Therefore, non-delimited addresses cannot be matched reliably and is not supported.
+- Net
+  - Net is an IP subnet calculator with extras
+  - IPv4 subnet calculation includes subnet range, default gateway and a count of the total nubmer of hosts
+  - IPv6 subnet calculation includes range the first and last host of the subnet and the total number of hosts
+  - User defined network prefix
+  - IPv4 and IPv6 calculations include idenfication of global, private, multicast, reserved, unspecified, loopback and link local IP addresses
+  - Collapses multiple, contiguous IPv4 subnets into the largest subnet possible
+  - Collapses multiple, contingous IPv6 prefixes into the largest possible summary
+  - Scrapes valid IP Addresses from unstructured text. IP addresses may be both IPv4 and IPv6 within an unstructured text. The scrape functionality considers only "full matches". IP addresses must be separated from other text by at least a single space.
+  - Sun or Moon UI Presentation
+

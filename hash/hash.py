@@ -231,7 +231,7 @@ class Window(QMainWindow):
                     self.output_text.clear()
                     self.hash_output(f'{vt_data}')
                 except KeyError as e:
-                    self.hash_output(f'Error: {e}')
+                    self.hash_output(f'No Virus Total data for {hash_value}')
             else:
                 self.hash_output('Invalid hash value')
 
