@@ -80,43 +80,41 @@ class IP_calculate(QRunnable):
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        # self.setFixedSize(1000, 700)
         self.threadpool = QThreadPool()
         self.setWindowTitle('Net')
-        self.setFont(QFont('Arial', 14))
+        self.setFont(QFont('Arial', 12))
         #
         widget = QWidget(self)
         layout = QGridLayout(widget)
         #
-        self.ip_ver_btn = QPushButton('Press to Toggle IP Version', self)
-        self.ip_ver_btn.setFixedWidth(230)
+        self.ip_ver_btn = QPushButton('IPv6', self)
+        self.ip_ver_btn.setStyleSheet('background-color: #f0f0f0')
         self.ip_ver_btn.clicked.connect(self.ip_version)
         layout.addWidget(self.ip_ver_btn, 0, 0)
+        #
+        self.ip_calc_btn = QPushButton('Calculate IP Range', self)
+        self.ip_calc_btn.setStyleSheet('background-color: #f0f0f0')
+        self.ip_calc_btn.clicked.connect(self.calc_ip)
+        layout.addWidget(self.ip_calc_btn, 0, 4)
         #
         self.output_text = QTextEdit()
         self.output_text.setPlaceholderText('Output')
         self.output_text.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        layout.addWidget(self.output_text, 1, 0, 1, 4)
+        layout.addWidget(self.output_text, 1, 0, 1, 5)
         #        
         self.ip_entry = QLineEdit(self)
-        self.ip_entry.setPlaceholderText('IP Address')
+        self.ip_entry.setPlaceholderText('Input IPv4 Address')
         layout.addWidget(self.ip_entry, 0, 1)
-        self.ip_entry.setDisabled(True)
         #
         self.cidr_label = QLabel('Prefix', self)
         self.cidr_label.setText('Prefix')
         layout.addWidget(self.cidr_label, 0, 2)
         #
         self.cidr_entry = QSpinBox(self)
-        self.cidr_entry.setDisabled(True)
         self.cidr_entry.setAccelerated(True)
+        self.cidr_entry.setStyleSheet('background-color: #f0f0f0')
         self.cidr_entry.setAlignment(Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.cidr_entry, 0, 3)
-        #
-        self.view_mode_btn = QPushButton('Moon', self)
-        self.view_mode_btn.setFixedWidth(100)
-        self.view_mode_btn.clicked.connect(self.view_mode)
-        layout.addWidget(self.view_mode_btn, 0, 4)
         #
         self.setCentralWidget(widget)
         self._createStatusBar() 
@@ -138,10 +136,8 @@ class Window(QMainWindow):
 
         self.main_toolbar = QToolBar('Calculate', self)
         self.main_toolbar.setMovable(False)
+        self.main_toolbar.setStyleSheet('background-color: #f0f0f0')
         self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, self.main_toolbar)
-        #
-        self.main_toolbar.addAction(self.ip_calc_action)
-        self.main_toolbar.addSeparator()
         #
         self.main_toolbar.addAction(self.cidr_collapse_action)
         self.main_toolbar.addSeparator()
@@ -155,6 +151,9 @@ class Window(QMainWindow):
         self.main_toolbar.addAction(self.copyAction)
         self.main_toolbar.addSeparator()
         self.main_toolbar.addAction(self.clear_outputAction)
+        self.main_toolbar.addSeparator()
+        self.main_toolbar.addAction(self.view_modeAction)
+
 
     # ::Control Section::
                                                                                                                                    
@@ -162,57 +161,42 @@ class Window(QMainWindow):
         '''
         Event driven actions
         '''
-        self.ip_calc_action = QAction('Calculate &IP Subnet', self)
-        self.ip_calc_action.setDisabled(True)
         self.cidr_collapse_action = QAction('Collapse IPv4 &CIDRs')
         self.collapsed_ipv6_prefixes = QAction('Collapse IPv6 Prefixes')
         self.ip_address_scraper = QAction('Scrape \nIPv4 and IPv6 \nAddresses', self)
         self.copyAction = QAction('C&opy Output', self)
         self.clear_outputAction = QAction('Clear &Output', self)
+        self.view_modeAction = QAction('Moon View', self)
        
     # ::Action Slots::
     def _connectActions(self):
         '''
         Event actions
         '''
-        self.ip_calc_action.triggered.connect(self.calc_ip)
+        self.ip_calc_btn.clicked.connect(self.calc_ip)
         self.cidr_collapse_action.triggered.connect(self.collapse_ip_subnets)
         self.collapsed_ipv6_prefixes.triggered.connect(self.collapse_ipv6_prefixes)
         self.ip_address_scraper.triggered.connect(self.scrape_ip_address)
         self.copyAction.triggered.connect(self.copy_content)
         self.clear_outputAction.triggered.connect(self.clear_output)
+        self.view_modeAction.triggered.connect(self.view_mode)
 
 
     def ip_version(self):
         '''
         Set IP Address to IPv4 or IPv6, default is IPv4, and set CIDR range to 32 or 128
         '''
-        if self.ip_ver_btn.text() == 'Press to Toggle IP Version':
-            self.ip_calc_action.setDisabled(False)
-            self.ip_entry.setDisabled(False)
+        if self.ip_ver_btn.text() == 'IPv6':
             self.clear_output()
             self.ip_ver_btn.setText('IPv4')
             self.ip_entry.setFocus()
-            self.ip_entry.setPlaceholderText('Input IPv4 Address')
-            self.cidr_entry.setDisabled(False)
-            self.cidr_entry.setRange(0,32)
+            self.ip_entry.setPlaceholderText('Input IPv6 Address')
+            self.cidr_entry.setRange(0,128)
         elif self.ip_ver_btn.text() == 'IPv4':
-            self.ip_calc_action.setDisabled(False)
-            self.ip_entry.setDisabled(False)
             self.clear_output()
             self.ip_ver_btn.setText('IPv6')
-            self.ip_entry.setFocus()
-            self.ip_entry.setPlaceholderText('Input IPv6 Address')
-            self.cidr_entry.setDisabled(False)
-            self.cidr_entry.setRange(0,128)
-        elif self.ip_ver_btn.text() == 'IPv6':
-            self.ip_calc_action.setDisabled(True)
-            self.ip_entry.setDisabled(True)
-            self.clear_output()
-            self.ip_ver_btn.setText('Press to Toggle IP Version')
-            self.ip_entry.setPlaceholderText('IP Address')
-            self.cidr_entry.setRange(0,0)
-            self.cidr_entry.setDisabled(True)
+            self.ip_entry.setPlaceholderText('Input IPv4 Address')
+            self.cidr_entry.setRange(0,32)
 
     def calc_ip(self):
         '''
@@ -226,7 +210,6 @@ class Window(QMainWindow):
         ip_calculate.signals.error.connect(self.calc_output)  
         self.threadpool.setMaxThreadCount(5)    
         self.threadpool.start(ip_calculate)
-        self.ip_calc_action.setDisabled(True)
 
     def collapse_ip_subnets(self):
         '''
@@ -237,9 +220,14 @@ class Window(QMainWindow):
         label = "Collapse IPv4 CIDRs"
         text = "Input text containting IPv4 CIDRs"
         ip_cidr_entry, ok = QInputDialog.getMultiLineText(self, title, label, text)
+        cidr_list = []
         if ok == False:
             return
-        cidr_list = ip_cidr_entry.split() 
+        sep, ok = QInputDialog.getText(self, "Separator", "Are the IP comma delimited? (y/n)")
+        if sep == 'y':
+            cidr_list = ip_cidr_entry.split(',')
+        else:
+            cidr_list = ip_cidr_entry.split() 
         cidr_validated_list = []
         cidr_invalidated_list = []
         for item in cidr_list:
@@ -351,15 +339,15 @@ class Window(QMainWindow):
         self.ip_entry.clear()
         self.cidr_entry.clear()
         self.ip_entry.setFocus()
-        self.ip_calc_action.setDisabled(False)
+        self.ip_calc_btn.setDisabled(False)
 
     def view_mode(self):
         '''
-        Sun of Moon Mode
+        Sun or Moon Mode
         '''
-        mode = self.view_mode_btn.text()
-        if mode == 'Sun':
-            self.view_mode_btn.setText('Moon')
+        mode = self.view_modeAction.text()
+        if mode == 'Sun View':
+            self.view_modeAction.setText('Moon View')
             self.sun_palette = QPalette()
             self.sun_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.white)
             self.sun_palette.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.white)
@@ -369,8 +357,8 @@ class Window(QMainWindow):
             self.sun_palette.setColor(QPalette.ColorRole.PlaceholderText, Qt.GlobalColor.darkGray)
             self.sun_palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, Qt.GlobalColor.black)
             self.setPalette(self.sun_palette)
-        elif mode == 'Moon':
-            self.view_mode_btn.setText('Sun')
+        elif mode == 'Moon View':
+            self.view_modeAction.setText('Sun View')
             self.moon_palette = QPalette()
             self.moon_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.transparent)
             self.moon_palette.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.gray)
@@ -396,8 +384,6 @@ if __name__ == '__main__':
     app.setPalette(palette)
     win = Window()
     win.setWindowTitle('Net')
-    # base = win.baseSize()
-    # win.setBaseSize(base)
     win.show()
     win.ip_entry.setFocus()
     sys.exit(app.exec())

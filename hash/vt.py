@@ -21,6 +21,7 @@ class VT:
             type_description = self.data['attributes']['type_description']
             reputation = self.data['attributes']['reputation']
             threat_label = self.data['attributes']['popular_threat_classification']['suggested_threat_label']
+            call_back_url = f'https://www.virustotal.com/gui/file/{hash}'
             total_votes_list = []
             results_list = []
             for k, v in self.data['attributes']['total_votes'].items():
@@ -42,7 +43,7 @@ class VT:
             malicious_list.sort()
             results_data = '\n'.join(malicious_list)
             total_malicious = len(malicious_list)
-            report = f'File Hash: {hash}\n\nType: {type_description}\nThreat Names: {threat_names}\nThreat Label: {threat_label}\nReputation: {reputation}\n\nTotal Votes:\n{total_votes_data}\n\n{total_malicious} Vendors identified this hash as malicious:\n{results_data}\n\n'
+            report = f'File Hash: {hash}\n\nType: {type_description}\nThreat Names: {threat_names}\nThreat Label: {threat_label}\nReputation: {reputation}\n\nTotal Votes:\n{total_votes_data}\nCall Back URL: {call_back_url}\n\n{total_malicious} Vendors identified this hash as malicious:\n{results_data}\n\n'
             return report
         except KeyError:
             error_message = self.answer['error']['message']
