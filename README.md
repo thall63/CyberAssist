@@ -16,7 +16,7 @@ See https://github.com/thall63/CyberAssist/blob/main/LICENSE
 ## Available Apps
 - Net
   - Net is an IP subnet calculator with extras
-  - IPv4 subnet calculation includes subnet range, default gateway and a count of the total nubmer of hosts
+  - IPv4 subnet calculation includes subnet range, default gateway and a count of the total number of hosts
   - IPv6 subnet calculation includes range the first and last host of the subnet and the total number of hosts
   - User defined network prefix
   - IPv4 and IPv6 calculations include idenfication of global, private, multicast, reserved, unspecified, loopback and link local IP addresses
