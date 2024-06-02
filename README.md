@@ -5,7 +5,7 @@ Cyber Analysts need tools. The CyberAssist Project is a collection of deskside t
 All tools are coded with **Python** and **PyQT6**. PyQT6 was selected as a GUI Framework for it's friendly and fast coding attributes and it's performance enhancing and easy to use implementation of PyQT Threads.
 
 ## Cyber Community
-I maintain the Cyber Assist Project for the Cyber Community in an effort to promote the legal use and sharing of functional cyber security tools. Maintaining a small set of local, trusted tools prevents the download of weaponized trojans and provides underserved cyber analysts with a free, essential resource. It is the intention of this project to asssit investigations, promote learning and to improve these tools with community contributions.
+I maintain the Cyber Assist Project for the Cyber Community in an effort to promote the legal use and sharing of functional cyber security tools. Maintaining a small set of local, trusted tools prevents the download of weaponized trojans and provides underserved cyber analysts with a free, essential resource. It is the intention of this project to assist investigations, promote learning and to improve these tools with community contributions.
 
 ## Install
 Simply install PyQt6 into your python environment, *pip install PyQt6*. Each app may be compiled to run as a single file executable. I recommend "pyinstaller" for creating a single "exe" file that runs on Windows environments. The *requirements.txt* file lists the individual PyQt6 packages and versions used. All other imports are Python "*built-ins*". A compiled version of each app will also be provide as a gitHub "release".
