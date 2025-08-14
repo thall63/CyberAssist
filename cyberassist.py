@@ -86,7 +86,7 @@ class TabbedWindow(QMainWindow):
 
         # Status bar
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage('Cyber Assistant')
+        self.statusbar.showMessage('Cyber Assistant v1.0')
 
         # Set view mode
         self.view_mode()
@@ -643,5 +643,6 @@ if __name__ == "__main__":
     window = TabbedWindow()
     # Show the window
     window.show()
+    window.setWindowTitle("Cyber Assistant for Cyber Heroes")
     # Start the event loop
     sys.exit(app.exec())
