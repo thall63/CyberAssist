@@ -1,5 +1,5 @@
-# CyberAssist Project  
-Cyber Analysts need tools. The CyberAssist Project is a deskside tool designed for cyber analysts. Each tab in the gui interface provides powerful capability. The **CyberAssist Project** release currently features IP Subnetting, IP scraping, base64 encoding/decoding, file hashing and reputational virus total lookups.  
+# CyberAssist  
+Cyber Analysts need tools. CyberAssist is a deskside tool designed for cyber analysts. Each tab in the gui interface provides powerful capability. The **CyberAssist** release currently features IP Subnetting, IP scraping, base64 encoding/decoding, file hashing and reputational virus total lookups.  
 
 ## Coding
 All tools are coded with **Python** and **PyQT6**. PyQT6 was selected as a GUI Framework for it's friendly and fast coding attributes and it's performance enhancing and easy to use implementation of PyQT Threads. Additonally, the source code is available for modification per the license thus providing "starter code" with practical examples.
@@ -8,7 +8,7 @@ All tools are coded with **Python** and **PyQT6**. PyQT6 was selected as a GUI F
 I maintain CyberAssist for the Cyber Community in an effort to promote the legal use and sharing of functional cyber security tools. Maintaining a small set of local, trusted tools prevents the download of weaponized trojans and provides underserved cyber analysts with a free, essential resource. It is the intention of this project to assist investigations, promote learning and to improve these tools with community contributions.
 
 ## Build
-Simply install PyQt6 into your python environment, *pip install PyQt6*. The CyberAssist app may be compiled to run as a single file executable. I recommend "pyinstaller" for creating a single, executable file that runs on Windows environments. The *requirements.txt* file lists the individual PyQt6 packages and versions used. All other imports are Python "*built-ins*" or custom code included with the source. A compiled version of each app will also be provide as a gitHub "release". At this time CyberAssit has been compiled and tested with Windows 10 and 11 and Ubuntu Linux. PyQt6 is cross-platform, so compiling it for MacOS is possible but has not been tested.
+Simply install PyQt6 into your python environment, *pip install PyQt6*. The CyberAssist app may be compiled to run as a single file executable. I recommend "pyinstaller" for creating a single, executable file that runs on Windows environments. The *requirements.txt* file lists the individual PyQt6 packages and versions used. All other imports are Python "*built-ins*" or custom code included with the source. A compiled version of each app will also be provide as a gitHub "release". At this time CyberAssit has been compiled and tested with Windows 10 through 11 and Ubuntu Linux. PyQt6 is cross-platform, so compiling it for MacOS is possible but has not been tested.
 
 ## Install pre-compiled images
 Just drag the Windows executable to any location and double click. With Linux distributions, you may create an executable shortcut as well. Running the app with "./cyberassist" from the directory it is copied to will work very well.
