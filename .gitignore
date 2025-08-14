@@ -164,3 +164,11 @@ cython_debug/
 *.txt
 !requirements.txt
 net/ip_scraper.py
+/atk5
+/net
+/hash
+/data
+/historical
+*.desktop
+tab_app.py
+*.pdf
